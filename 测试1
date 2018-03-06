@@ -1,22 +1,15 @@
 #include<stdio.h>
-#include<windows.h>
-#pragma comment(lib, "winmm.lib")
-#include<stdlib.h>
-#include<time.h>
 
-void color() {
-	Sleep(500);
-	system("color 01");
-	Sleep(500);
-	system("color 02");
-	Sleep(500);
-	system("color 03");
-	Sleep(500);
-	system("color 04");
-	Sleep(500);
-	system("color 0E");
-	Sleep(500);
-}
+struct data {
+	int HP; //生命值
+	int MP; //耐力
+	int DP; //防御
+	int ATT; //攻击力
+	int STR; //力量
+	int DEX; //敏捷
+	int CHR; //魅力
+
+} Player;
 
 
 int main() {
