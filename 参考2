@@ -1,0 +1,423 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+
+void deathm();
+void author();
+void runto();
+
+int main(void) {
+
+    //作者声明函数
+    author();
+
+    //变量定义
+    int choice;         //玩家选择
+    int choice2;        //第二天的玩家选择
+    int hp = 100;       //血量
+    int thirst = 0;     //口渴度
+    int timeAlive = 0;  //存活时间
+    int coins = 0;      //硬币功能
+    int case1choice;    //case1的选择
+    int case2choice;    //case2的选择
+    int case3choice;    //case3的选择
+    int deal1;          //第一个交易的选项
+    int deal1_1;        //第一个交易的交易选项
+    int bottle = 0;     //水瓶
+    int j;              //循环变量
+    int k;              //循环变量
+    int twocase1choice;   //第二天的case1选择
+    int twocase2choice;   //第二天的case2选择
+    int twocase3choice;   //第二天的case3选择
+    int twocase4choice;   //第二天的case4选择
+    char name[20];           //求生者的名字
+
+    //游戏规则
+    printf("你的血量是：%d\n", hp);
+    printf("你的口渴度是：%d\n", thirst);
+    printf("存活时间：%d\n", timeAlive);
+    Sleep(1000);
+    printf("*血量到0极为死亡*\n");
+    printf("*口渴度到10极为死亡*\n");
+    printf("*存活时间到3极为成功存活*\n");
+    Sleep(5000);
+    system("cls");
+
+    printf("请输入你的名字：");
+    scanf("%s", name);
+    printf("求生者[%s]开始你的冒险吧！\n", name);
+
+    //游戏剧情
+    printf("在一个月黑风高的夜晚...\n");
+    printf("突然传来了爆炸声...你醒了...\n");
+    printf("你发现周围什么都没了...\n");
+    printf("一群僵尸围着你...你有以下选择\n");
+    Sleep(5000);
+
+    //任务分支
+    printf("请使用数字1-4选择\n");
+    printf("1.逃跑到停车场\n");
+    printf("2.去超市搜刮一波\n");
+    printf("3.寻找存活的人\n");
+    printf("4.留在原地不动\n");
+    Sleep(1000);
+    printf("请输入：");
+    scanf("%d", &choice);
+    Sleep(1000);
+    system("cls");
+
+    switch(choice) {
+        case 1:
+            printf("停车场里有车，但是附近有僵尸\n");
+            printf("进入输入1，待在停车场请输入2\n");
+            scanf("%d", &case1choice);
+            if (case1choice == 1) {
+                printf("车里躲了一只僵尸\n");
+                printf("你的血量减少了20");
+                printf("但是你捡到了1个金币");
+                coins++;
+                hp -= 20;
+                timeAlive++;
+                thirst++;
+            } else {
+                printf("僵尸太多了，你在逃跑时被抓伤了\n");
+                printf("你的血量减少了5\n");
+                hp = hp -5;
+                timeAlive++;
+                thirst++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 2:
+            printf("僵尸把你包围了，你是要突围还是躲到储藏室\n");
+            printf("突围输入1，躲藏到储藏室输入2\n");
+            scanf("%d", &case2choice);
+            if (case2choice == 1) {
+                printf("突围失败！但是僵尸去吃别的人的尸体了\n");
+                printf("你的血量减少了20");
+                hp -= 20;
+                timeAlive++;
+                thirst++;
+            } else {
+                printf("没有人发现你，但是你踩到了香蕉摔了个跟头\n");
+                printf("你的血量减少了10\n");
+                printf("但是你在柜子里发现了1个金币");
+                coins++;
+                hp -= 10;
+                timeAlive++;
+                thirst++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 3:
+            printf("你的伙伴被感染了，你要救他吗？\n");
+            printf("救他输入1，当做没看见输入2\n");
+            scanf("%d", &case3choice);
+            if (case3choice == 1) {
+                printf("你成功救了他，没有受到任何伤害\n");
+                printf("你的血量减少了0");
+                hp -= 0;
+                timeAlive++;
+                thirst++;
+            } else {
+                printf("他说你是一个冷血！并且咬了你一口\n");
+                printf("你的血量减少了10\n");
+                printf("他走的时候掉了1个金币");
+                hp -= 10;
+                timeAlive++;
+                thirst++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 4:
+            printf("你留在了原地不动，你没有任何武器\n");
+            printf("僵尸已经逼近，你只能坐以待毙...\n");
+            hp -= 100;
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }else {
+                goto success;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        default:
+            printf("什么？没僵尸？你的打开方式错了\n");
+            break;
+    }
+
+
+    //第一天结束的交易
+    printf("这里有个商人，要交易，你要吗？\n");
+    printf("想交易的话输入1，不想的话输入2\n");
+    Sleep(1000);
+    if(hp > 0) {
+    scanf("%d", &deal1);
+    if(deal1 == 1) {
+        if(coins >= 1) {
+            printf("************************************\n");
+            printf("\t我有一个水瓶，我要一个金币");
+            printf("\n************************************\n");
+            printf("要的话请输入1，终止交易输入2\n");
+            scanf("%d", &deal1_1);
+            if (deal1_1 == 1) {
+                printf("水瓶给你了，以后合作！\n");
+                coins--;
+                bottle++;
+            }
+        }else {
+            printf("看来你没钱给跟我交易，穷小子\n");
+            }
+
+        }
+    }
+    Sleep(1000);
+
+    //水瓶使用
+    if(bottle >= 1) {
+        printf("你喝了水，口渴度变为0\n");
+        thirst = 0;
+    }
+
+    system("cls");
+
+    runto();
+
+    //第二天任务分支
+    printf("请使用数字1-4选择\n");
+    printf("1.进入军事基地\n");
+    printf("2.去打猎找点吃的\n");
+    printf("3.躲进洞穴里\n");
+    printf("4.爬上千年古树\n");
+
+    printf("请输入：");
+    scanf("%d", &choice2);
+
+    Sleep(1000);
+    system("cls");
+
+    switch(choice) {
+        case 1:
+            printf("军事基地不让你进入，眼看僵尸已经围上来了\n");
+            printf("输入1翻墙进入，输入2快速逃跑\n");
+            scanf("%d", &twocase1choice);
+            if(twocase1choice == 1) {
+                printf("你翻墙失败，正在不停的流血\n");
+                for(j = 0; j < 10; j++) {
+                    printf("-1");
+                    hp--;
+                }
+                thirst++;
+                timeAlive++;
+                printf("幸好你在墙角发现了1个金币\n");
+            } else {
+                printf("你被僵尸抓住了，头被啃了下来\n");
+                hp -= 100;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }else {
+                goto success;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 2:
+            printf("你看到一只小狼崽，你是杀了它吃还是放过它\n");
+            printf("上去杀了小狼输入1，放过它输入2\n");
+            scanf("%d", &twocase2choice);
+            if (twocase2choice == 1) {
+                printf("小狼反过来咬了你一口，你正在不停的失血\n");
+                for(k = 0; k < 10; k++) {
+                    printf("-2");
+                    hp -= 2;
+                }
+                thirst++;
+                timeAlive++;
+            }else {
+                printf("你转头离开了，并且发现了1个金币\n");
+                printf("你没有受到任何伤害\n");
+                thirst++;
+                timeAlive++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }else {
+                goto success;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 3:
+            printf("洞穴里一片漆黑，你还要躲进去吗？\n");
+            printf("躲进去输入1，离开输入2\n");
+            scanf("%d", &twocase3choice);
+            if(twocase3choice == 1) {
+                printf("你进入了洞穴，但是被僵尸抓伤了\n");
+                printf("血量减少了40\n");
+                hp -= 40;
+                thirst++;
+                timeAlive++;
+            }else {
+                printf("你离开了洞穴，周围一片漆黑...\n");
+                printf("突然飞出来了一个骷髅头，你被砸中了\n");
+                printf("血量减少了20\n");
+                hp -= 20;
+                thirst++;
+                timeAlive++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }else {
+                goto success;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        case 4:
+            printf("千年古树很陡峭，你不会爬树，还要上去吗\n");
+            printf("上去输入1，在树旁边睡下输入2\n");
+            scanf("%d", &twocase4choice);
+            if(twocase4choice == 1) {
+                printf("你从树上摔了下来，你一直在流血，还好止住了\n");
+                printf("血量减少了50\n");
+                hp -= 50;
+                thirst++;
+                timeAlive++;
+            }else {
+                printf("树边有遮挡物，很安全你没被发现\n");
+                printf("血量减少了0\n");
+                thirst++;
+                timeAlive++;
+            }
+            if(hp <= 0) {
+                deathm();
+                goto jieshu;
+            }else {
+                goto success;
+            }
+            printf("\n************************************\n");
+            printf("你的血量是：%d\n", hp);
+            printf("你的口渴度是：%d\n", thirst);
+            printf("存活时间：%d\n", timeAlive);
+            printf("你携带的水瓶：%d\n", bottle);
+            printf("你的金币：%d", coins);
+            printf("\n************************************\n");
+            Sleep(5000);
+            system("cls");
+            break;
+        default:
+            printf("什么？没僵尸？你的打开方式错了\n");
+            break;
+    }
+
+    //goto语句，结束提醒
+    jieshu:
+        printf("\n************************************\n");
+        printf("游戏已经结束，感谢游玩!\n");
+        printf("\n************************************\n");
+        printf("感谢求生者[%s]体验本游戏", name);
+        printf("\n************************************\n");
+    if(timeAlive >= 3) {
+    success:
+        printf("\n************************************\n");
+        printf("你成功的存活到了第3天，感谢游玩！");
+        printf("\n************************************\n");
+        printf("感谢求生者[%s]体验本游戏", name);
+        printf("\n************************************\n");
+    }
+
+}
+
+void deathm() {
+
+    //死亡提示
+    printf("\n************************************\n");
+    printf("\t你已经死亡！");
+    printf("\n************************************\n");
+}
+
+void author() {
+
+    //作者申明
+    printf("\n************************************\n");
+    printf("\t丧失求生-永恒制作");
+    printf("\n************************************\n");
+    //Sleep(1000);
+}
+
+void runto() {
+
+    //跑路
+    printf("跑路中...跑路中...\n");
+    printf("好累...好累...\n");
+    printf("白天到了，下一步干什么\n");
+}
