@@ -13,6 +13,9 @@ struct data {
 
 } Player;
 
+struct data {
+
+
 void color() {
 	Sleep(500);
 	system("color 01");
@@ -65,15 +68,64 @@ void progress() {
 	}
 }
 
+void selectplayer(int n) {
+	system("cls");
+	puts("请选择一个英雄:\n");
+	int m;
+	puts("1.下面使者");
+	puts("2.XB骑士");
+	puts("3.天宇技师");
+	puts("4.单车武士");
+    scanf("%d",&m);
+    aa:if(m==1) {
+		Player.HP=10;
+		Player.MP=10;
+		Player.DP=10;
+		puts("你将成为下面使者开始冒险!");
+		n=1;
+	}else if(m==2) {
+		Player.HP=10;
+		Player.MP=10;
+		Player.DP=10;
+		puts("你将成为XB骑士开始冒险!");
+		n=2;
+	}else if(m==3) {
+		Player.HP=10;
+		Player.MP=10;
+		Player.DP=10;
+		puts("你将成为天宇技师开始冒险!");
+		n=3;
+	}else if(m==4) {
+		Player.HP=10;
+		Player.MP=10;
+		Player.DP=10;
+		puts("你将成为单车武士开始冒险!");
+		n=4;
+	}else {
+		puts("要选择一个角色哦!");
+		scanf("%d",&m);
+		goto aa;
+	}
+
+}
+
+void text1() {
+	puts("");
+
+}
+
+
 void main() {
 	system("mode con cols=55 lines=30");
 	puts("*******************************************************");
 	puts("                欢迎来到神奇的冒险世界 \n        ");
 	puts("*******************************************************");
 	color();
-	puts("经历了千辛万苦，你竟然活下来了……其实就是几次退出而已…\n咳咳…终于来到了第二关\n");
+	puts("一个狂妄的灵魂占据了古代英雄的躯体  要在传说中的世界中面对着压倒性的挑战 冲出一条血路。…\n咳咳…\n");
 	Sleep(500);
 	puts("             如果准备好了就按下你的回车吧！    ");
 	getchar();
 	progress();
+	int n;
+	selectplayer(n);
 }
