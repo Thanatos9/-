@@ -1,0 +1,1581 @@
+/*灭龙传说文字版  V2014.5.03.01  By WinKill V1.3.1  */ 
+#include<stdio.h>
+#include<stdlib.h>
+#include<windows.h>
+#include<string.h>
+#include<conio.h>                 //引用 
+#define cls system("cls") //清屏 
+#define dis_time 0
+#define pause_time 1000
+
+void ttdy(char main_t[],char m_title[],int clspa,int clspb,int timep,int ptime);//打印函数 
+void sttdy(char stt[],int timep,int ptime);//单一打印：打印字符、播放速度、暂停时间 
+void errdy(char etext[],char e_title[],char e_class[],int clsup);//错误提示：提示内容、提示标题、严重情况、清屏 
+void btdy(char btfh[],char bttitle[]);//标题打印函数：美化符号、标题
+void gsdy(char gst[],int len);//打印间隔条 
+
+void HideCursor();//隐藏光标 
+void main_dh();
+void newgame();
+void menuf();
+void datdell();void save_dat();void read_dat();
+void peoinfo();
+void lookwep();
+void wupin(); void usewp(int bhao);
+void shopc();  void wpinfo(int bhao);  void buywp(int bhao);void pwp(int bhao);//商店、物品信息、买东西、卖东西 
+void cityc();void cityinfo(int bhao);
+void help_menu();
+void small_game();
+void upcheck();
+void end_from_menu();
+void skill();  void skillinfo(int bhao);void skdy(char skt[]);
+void gwinfo(int bhao);
+void god_here();
+void god_mod();
+void date_check();
+void pkload(int bhao);void pkwin(int bhao);void pklost(int bhao); 
+void test();              //各功能函数
+ 
+int shop_n,spn_a,spn_b,spn_c,spn_n,spback_n; //商店种类判断参数 
+int wpinfo_n,wpback_n=0,wp_run_n;//信息界面显示菜单值，1显示使用，2显示购买 
+int sp_a[10],sp_b[10],sp_c[10];//列表具体物品判定
+int sk_n,skback_n=0,skill_n=0;  //技能参数，返回值（0返回人物信息，1返回战斗）， 
+int pkmenu_n=0,here_ghp,pkstart=0;//PK菜单显示判断，0则显示返回，1则不能再返回。 
+int getgj,getfy,getspeed,getsk,gethp;
+int lgj=1,lfy=1,lspeed=1;//因技能产生的临时倍率 
+int lggj=1,lgfy=1,lgspeed=1;//因技能产生的怪物临时倍率 
+int getggj,getgfy,getgspeed,getgsk,getghp;//战斗必须参数 
+int cityk_n;//城市返回全局参数 
+int dat_back=0;//返回何处读档 
+int upcheck_k=0; //升级奖励不重复
+int shop_back=0;//商店返回 
+
+char main_t[700]="自古就有想要屠龙的勇士，世间也流传着无数屠龙的传说！毫无疑问，能够成为屠龙之人，必定能够名动天下，流传千古。而《灭龙传说》的故事，就开始于屠龙，开始于你。。。"; 
+char main_t_title[30]="《灭龙传说》游戏序V1.5"; 
+char help_m[600]="本游戏十分简单，所有操作只需按选项之前的字母或者数字。作为一款文字游戏，本游戏没有华丽的图片和声音特效，只为交流编程技术，当你闯关完成后，将会获得本程序的源代码。注意，不要试图使用不正常方法通关哦！";
+int main_pd=1,welcome_n=1;//开场动画播放判定 
+
+struct player{char name[20];int dj;int gj;int fy;int speed;int luck;int gold;int yesp;int exp;int exped;int hp;int hpmax;int mp;int mpmax;}gplay[10];
+//角色数组：角色名，等级，攻击，防御，速度，幸运，金币，存在判断（ 若yesp=99则判定用户已存在），经验，升级经验，血量和魔法值。 
+
+struct wp{char name[30];char pinzhi[20];int zyk;int jhp;int jmp;int jgj;int jfy;int jspeed;int jluck;int mgold;int nbag;int jbaoj;int haved;int mhave;int cbuy;int cshop;}gwp[];
+//物品数组：物品名，品质，作用值，加血，加魔，加攻击，加防御，加速度，加幸运，价格，占用包裹，加暴击，拥有量，最大拥有，可买（1可买，0不可），可卖（1可）。 
+
+struct ct{char name[30];char info[100];int sgnum;int gnum;int ndj;}gct[];
+//地图结构：地图名，简介；怪物起点，怪物数量，限制等级 
+
+struct gw{char name[30];char talk[200];int dj;int gj;int fy;int speed;int hp;int hpmax;int mp;int mpmax;int hexp;int hgold;int hyp;int hwp;int hqb;int allow_run;}ggw[];
+//怪物结构：名称，交流，等级，攻击，防御，速度，血，最大血，魔，最大魔，携带经验，携带金币，随机奖励药品（1有），随机武器，随机奇宝，允许逃跑（1允许） 
+
+struct skill{char name[50];char info[200];int keep;int jhp;int jgj;int jfy;int jspeed;int jluck;int nmp;int ndj;int allow_use;}gskill[];
+//技能结构：名称，介绍，持续回合，加血，加攻击(百分比），加防御，加速度，加幸运，释放需要MP，限制等级，，允许释放（1允许）， 
+	
+int c_play,c_gwp;//数组编号统计 
+
+struct wp gwp[200]={
+                 {"小灵芝","低级★",1,50,0,0,0,0,0,20,1,0,3,99,1,1},
+                 {"中灵芝","中级★★",1,100,0,0,0,0,0,40,2,0,1,99,1,1},
+                 {"大灵芝","高级★★★",1,200,0,0,0,0,0,80,3,0,1,99,1,1},
+                 {"卤肉  ","初级★",1,80,0,0,0,0,0,30,1,0,0,99,1,0},
+                 {"小鸭脖","初级★",1,100,0,0,0,0,0,35,1,0,5,99,1,1},
+				 {"小蓝瓶","初级★",1,0,50,0,0,0,0,20,1,0,0,99,1,1},
+				 {"中蓝瓶","中级★★",1,0,100,0,0,0,0,40,2,0,0,99,1,1},
+				 {"大蓝瓶","高级★★★",1,0,200,0,0,0,0,80,3,0,1,99,1,1},
+				 {"金鳌  ","高级★★★",3,0,0,5,0,0,0,200,2,0,2,99,1,1},
+				 {"野山椒","中级★★",3,0,0,2,0,0,0,80,2,0,1,99,1,1},
+				 {"巨蜥肉","高级★★★",3,0,0,0,10,0,0,100,3,0,1,99,1,1},
+				 {"龙血  ","神级★★★★★",3,300,100,2,2,2,0,600,5,0,1,99,0,0},
+				 {"龙肉  ","神级★★★★★",3,0,0,10,20,10,0,800,5,0,1,99,0,0},
+				 {"木剑  ","初级★",2,0,0,10,0,0,0,50,1,0,1,1,0,0},
+				 {"木衣  ","初级★",2,0,0,0,10,0,0,50,1,0,1,1,0,0},
+				 {"木鞋  ","初级★",2,0,0,0,0,10,0,50,1,0,1,1,0,0}, 
+				 {"屠龙剑","神级★★★★★",2,0,0,100,0,0,0,10000,0,0,0,1,1,1},
+				 {"龙皮铠甲","神级★★★★★",2,0,0,0,200,0,0,10000,0,0,0,1,1,1},
+				 {"涅槃丹","神级★★★★",3,100,100,100,100,20,10,5000,1,1,0,1,1,1},
+				 };//物品定义处：物品名，品质，作用值，加血，加魔，加攻击，加防御，加速度，加幸运，价格，占用包裹，加暴击，拥有量，最大拥有，可买（1可买，0不可），可卖（1可）。  
+
+struct ct gct[8]={
+	               {"叶龙岛","嘎嘎，欢迎踏入死亡之岛！",0,4,1},
+	               {"炎龙沙漠","Welcome!炎龙岛群龙大喊！",4,4,3},
+				   {"青龙仙宫","青龙仙宫，天下第一宫！",8,4,5},
+				   {"恶龙洞穴","你来这里是要作死么？",12,4,10},
+				   {"水晶宫","龙王在此。还不下跪？",16,4,15},
+				   {"龙王殿","真正的龙王在这里。",20,4,19},
+				   {"超级魔龙","你能来到这里算你命大，不过到此结束了！",24,4,30},
+				    
+                 };//地图定义：地图名，简介；怪物起点，怪物数量，限制等级  
+
+
+struct gw ggw[200]={
+	                  {"灼热龙蛋","呜呜。。呜呜。离我远一点！",1,5,5,0,30,30,10,10,12,3,1,1,1,0},
+	                  {"一岁幼龙","你是谁啊？想干嘛？不要过来！嗷",2,10,2,15,100,100,30,30,12,8,1,0,1,0},
+	                  {"三岁幼龙","我的奶瓶！",3,13,18,3,200,200,50,50,20,12,1,0,0,0},
+	                  {"五岁幼龙","就是你抢走了我弟弟的奶瓶？",5,16,20,5,300,300,70,70,25,20,1,1,0,1},//4
+	                  {"小龙盖茨","听说你打败了我的弟弟！受死吧！",7,23,25,6,380,380,80,80,35,28,1,1,1,0},
+	                  {"小龙比尔","我叫比尔，比尔盖茨的比尔。",9,26,30,9,430,430,89,89,40,35,1,1,1,0},
+	                  {"小龙乔布","乔布斯？？不不，我是乔布。",12,35,40,11,500,500,95,95,50,40,1,1,1,0},
+	                  {"变异怪龙","为什这么看我？我和其他龙不一样吗？",15,50,50,15,800,800,100,100,100,80,1,1,1,0},//8
+	                  {"青龙甲","我是甲！",17,60,60,17,700,700,110,110,80,80,1,0,0,0},
+	                  {"青龙乙","我是乙！",19,65,65,18,750,750,110,110,85,80,1,1,0,0},
+	                  {"青龙丙","我是丙！",20,70,65,19,800,800,110,110,95,90,1,1,1,0},
+	                  {"青龙丁","我当然是丁喽！",24,90,80,20,1000,1000,110,110,120,100,1,1,1,1},//12
+	                  {"恶龙A","我很善良！",25,75,75,22,850,850,120,120,100,100,1,1,0,0},
+	                  {"恶龙B","我本善良！",26,80,80,22,900,900,120,120,105,105,1,1,1,0},
+	                  {"恶龙C","我最善良！",27,90,90,23,1100,1100,130,130,150,150,1,1,1,0},
+	                  {"恶龙D","我就是恶龙了，想咋滴？？",30,100,100,25,1500,1500,140,140,300,150,1,1,1,1},//16
+	                  {"东海龙网","我是龙王！",31,105,105,26,1150,1150,130,130,200,160,1,1,1,0},
+	                  {"西海龙网","我是龙王！",32,110,110,27,1200,1200,130,130,210,180,1,1,1,0},
+	                  {"南海龙网","我是龙王！",33,115,115,28,1290,1290,135,135,230,200,1,0,0,0},
+	                  {"北海龙网","我是龙王！",35,160,180,30,1800,1800,150,150,600,300,1,1,1,1},//20
+	                  {"东海龙王","我不是龙网！",36,120,120,30,1300,1300,140,140,300,250,1,0,0,0},
+	                  {"西海龙王","我不是龙网！",37,125,125,32,1400,1400,150,150,350,300,1,0,1,0},
+	                  {"南海龙王","我不是龙网！",39,140,140,33,1600,1600,170,170,420,350,1,1,1,0},
+	                  {"北海龙王","我不是龙网！",45,200,200,36,2500,2500,200,200,1000,600,1,1,1,1},//24
+	                  {"魔龙守卫","啊，是人类啊，好久没吃到人类了！",46,150,150,34,1700,1700,180,180,450,400,1,0,0,0},
+	                  {"魔卫统领","我的手下被你干掉了？？",47,160,160,35,1800,1800,190,190,500,500,1,1,1,0},
+	                  {"魔龙小弟","你找我大哥有什么事情啊？",48,180,180,36,2000,2000,200,200,550,550,1,1,1,1},
+	                  {"超级魔龙","呜呜。。呜呜。离我远一点！你这混蛋！",50,500,500,50,5000,5000,300,300,3000,2000,1,1,1,1},//28 
+                   };//怪物定义:名称，交流，等级，攻击，防御，速度，血，最大血，魔，最大魔，携带经验，携带金币，随机奖励药品（1有），随机武器，随机奇宝，允许逃跑（1不允许) 
+
+
+struct skill gskill[100]={
+	                  {"治疗术  ","治疗术是一位善良的龙岛少女发明的，她用来治疗那些被屠龙勇士杀死父母后遗弃的小龙，后来她和一位屠龙勇士相爱，教会了这个勇士。补充HP50.",1,50,0,0,0,0,5,1,1},
+	                  {"磨光利刃","把你的刀磨得更加锋利，有效提升攻击力！“切龙皮就像切豆腐！”屠龙英雄盖尔这样说.小幅度提升攻击力",1,0,2,0,0,0,10,3,1},
+	                  {"猎龙斩  ","猎龙斩是一个猎人发明的，但他没有杀过龙，他坚信这招可以屠龙！小幅度提升攻击力和防御力。",1,0,2,2,0,0,30,5,1},
+	                  {"上古战技","上古？听起来好厉害的样子！ 没错，拥有上古战技，屠龙毫不费力！！大幅提升攻击力，小幅度提升防御力。",1,0,4,2,0,0,50,7,1},
+	                  {"绝地天道","高深的绝地天道就像绝地武士的激光剑一样给龙致命一击！造成巨大伤害！大幅度提升攻击力，小幅度提升防御力。",1,0,5,3,0,0,100,10,1},
+	                  {"引雷入体","想想吧，天雷环绕你的身体和剑，大幅度提升攻击力和防御力！持续一个回合！均衡的提升攻击力和防御力。",2,0,4,3,0,0,120,15,1},
+	                  {"天龙死音","天龙临死的绝唱，被杀死他的勇士用诺基亚自带的录音机录下，威力无比强大！补充200HP，并短暂提升攻击力和防御力！",1,200,6,2,2,0,150,17,1},
+	                  {"人剑合一","人剑合一是剑士的最终奥义，剑是人，人亦剑，达到融会贯通的最高境界！强力提升攻击力！",1,0,8,0,0,0,180,20,1},
+	                  {"一战屠龙","绝对逆天战技！可造成对方大量损失，并对己方攻击力、防御力10倍提升一回合！并且强力补充HP5000！",1,5000,10,10,0,0,250,30,1},
+                   };//技能定义 :名称，介绍，持续回合，加血，加攻击(百分比），加防御，加速度，加幸运，释放需要MP，限制等级，，允许释放（1允许），
+
+
+
+
+
+int main(void)  //开始主菜单SS 
+{
+	
+	HWND hwnd=GetForegroundWindow();
+	int x=(GetSystemMetrics(SM_CXSCREEN)-1000),y=(GetSystemMetrics(SM_CYSCREEN)-300);
+	system("title 【灭龙传说】V1.5");
+	system("mode con:cols=12 lines=15");
+	MoveWindow(hwnd,x/2,(y/5),x,y,1);
+	cls;
+	HideCursor();
+    char ch;
+	int pn; 
+  	if(main_pd==1)
+	{
+	main_dh();
+	main_pd=0;}
+
+	system("color 30");
+	for(pn=0;pn<60;pn++)
+	printf("*");
+	printf("\n\n\n");
+	for(pn=0;pn<25;pn++)
+	printf(" ");
+	printf("【灭龙传说】\n\n");
+	for(pn=0;pn<15;pn++)
+	printf(" ");
+	printf("[A]--新的征程\n");
+	for(pn=0;pn<15;pn++)
+	printf(" ");
+	printf("[B]--旧的回忆\n");
+	for(pn=0;pn<15;pn++)
+	printf(" ");
+	printf("[C]--隐居山林\n");
+	printf("\n\n\n") ;
+	for(pn=0;pn<60;pn++)
+	printf("*");
+	while(1)
+	{
+
+		ch=getch();
+
+		if(ch=='a'||ch=='A')
+		{
+		newgame();}
+		if(ch=='b'||ch=='B')
+		{
+		  dat_back=1;
+		  read_dat();
+		}
+		  
+		if(ch=='c'||ch=='C')
+		end_from_menu();
+		if(ch=='w')
+		god_here();
+	}
+}
+
+
+
+void newgame()//新英雄 
+{
+	cls;
+	int pn,nplay;
+	char pn_name[20],pm_name[20];
+	for(c_play=0;c_play<15;c_play++)//判断用户最大限额，不能超出最大限额 10个。 
+	{
+		if(gplay[c_play].yesp!=99)
+		{gplay[c_play].yesp=99;break;}
+		if(c_play>8)
+		{
+			errdy("最多创建10个角色，不能再创建更多的用户！","【超出限额】","低",1);
+			main();
+		}
+	}
+	if(welcome_n==1)
+	{
+		welcome_n=0;
+	ttdy(main_t,main_t_title,1,0,dis_time,pause_time);//播放游戏序，开始新的游戏， *
+	}
+	cls;
+	ttdy("欢迎你！勇士！请告诉我你的名字：","【勇士注册】",1,0,0,0);
+	scanf("%s",pn_name);
+	if((pn=strlen(pn_name))>20)
+	{printf("\n这么长的名字，我记不住！请重新输入!");
+	getch();
+	cls; 
+	newgame();}
+	if((pn=strlen(pn_name))<2)
+	{printf("\n太短了！");
+	printf("\n请再次输入!");
+	getch();
+	cls;
+	newgame();
+	}
+strcpy(gplay[c_play].name,pn_name);	
+gplay[c_play].dj=1;gplay[c_play].gj=5;gplay[c_play].fy=8;gplay[c_play].speed=3;gplay[c_play].luck=5;gplay[c_play].gold=1000;gplay[c_play].exp=0;gplay[c_play].exped=gplay[c_play].dj*50;gplay[c_play].hp=100;
+gplay[c_play].hpmax=100;gplay[c_play].mp=50;gplay[c_play].mpmax=50;//初始化新建角色的相关数据 
+	menuf();
+	}
+	
+	
+
+void menuf()//综合主菜单 
+{
+	cls;
+	int pn;
+	date_check();
+	system("color 30");
+	printf("\n");
+	for(pn=0;pn<25;pn++)
+	printf(" ");
+	printf("【灭龙传说】\n");
+	for(pn=0;pn<60;pn++) 
+	printf("-");
+
+	printf("\n\n勇士：%s (1级)",gplay[c_play].name);
+	printf("\n\n[A]--人物信息       [B]--包裹              [C]--商店");
+	printf("\n\n[D]--【战场】       [E]--档案              [F]--返回");
+	printf("\n\n[G]--小游戏         [H]--帮助");
+	while(1)
+	{
+		char chs;
+		chs=getch();
+		if(chs=='h'||chs=='H')
+		help_menu();
+		if(chs=='a'||chs=='A')
+		peoinfo();
+		if(chs=='f'||chs=='F')
+		main();
+		if(chs=='b'||chs=='B')
+		{
+			shop_n=1;
+			wpback_n=0;
+		    wupin();
+		}
+		if(chs=='c'||chs=='C')
+		{
+		shop_n=1;
+		shop_back=2;
+		shopc();
+		}
+		if(chs=='d'||chs=='D')
+		cityc();
+		if(chs=='e'||chs=='E')
+		{
+			dat_back=2;
+	    	datdell();
+		}
+		if(chs=='g'||chs=='G')
+		small_game();
+		if(chs=='M')
+		god_mod();
+		
+		}
+		
+		
+		menuf();
+	
+}
+
+void datdell()
+{
+	cls;
+	system("color 30");
+	btdy("-","【档案管理】");
+	printf("\n请选择菜单进行档案操作！");
+	printf("\n\n\nS--存储档案");
+	printf("\tR--读取档案");
+	printf("\n\n   Q--返回主菜单");
+	while(1)
+	{
+		char ch;
+		ch=getch();
+		if(ch=='s'||ch=='S')
+		save_dat();
+		if(ch=='r'||ch=='R')
+		read_dat();
+		if(ch=='q'||ch=='Q')
+		menuf();
+	}
+	datdell();
+		
+	
+}
+
+void save_dat()
+{
+	int pn;
+	btdy("-","【档案存储】");
+	printf("\n档案存储中，请稍候\n\t"); 
+	sttdy(".............",30,0);
+	FILE *fp;
+	if((fp=fopen("c:\\KillDragon.dat","w"))==NULL)
+	{
+		errdy("打开文件失败","【文件错误】","中",1);
+		datdell();
+	}
+	for(pn=0;pn<=10;pn++)
+	{
+		if(gplay[pn].gj>1)
+		{
+			if(fwrite(&gplay[pn],sizeof(struct player),1,fp)!=1)
+			{
+				printf("\n数据写入失败！");
+				getch();
+				datdell();
+			}
+		}
+	}
+	rewind(fp);
+	for(pn=0;pn<=200;pn++)
+	{
+		if(gwp[pn].haved>=1)
+		fprintf(fp,"%d",gwp[pn].haved);
+
+	}
+
+	if(fclose(fp)!=0)
+	{
+		printf("\n因未知原因，文件未能成功关闭，数据保存失败！");
+		getch();
+		datdell();
+	}
+	printf("\n档案存储成功！");
+	getch();
+	datdell();
+			
+	
+	
+}
+
+void read_dat()
+{
+	int pn;
+	btdy("-","【读取档案】");
+	printf("\n档案读取中，请稍候\n\t"); 
+	sttdy(".............",30,0);
+	FILE *fp;
+	if((fp=fopen("c:\\KillDragon.dat","r"))==NULL)
+	{
+	 printf("\n文件打开失败！"); 
+	 getch();
+	 datdell();
+	}
+	for(pn=0;pn<=9;pn++)
+	{
+	   fread(&gplay[pn],sizeof(struct player),1,fp);
+	   
+	}
+	rewind(fp);
+	for(pn=0;pn<=200;pn++)
+	{
+		fscanf(fp,"%d",&gwp[pn].haved);
+	}
+	
+	if(fclose(fp)!=0)
+	{
+		printf("\n文件关闭失败！");
+		getch();
+		datdell();
+	}
+	printf("\n档案读取成功！");
+	getch();
+	if(dat_back==1)
+	menuf();
+	if(dat_back==2)
+	datdell();
+		
+	
+}
+
+
+void cityc()//地图菜单 
+{
+	cls;
+	char ch; 
+	btdy("-","【灭龙战场】");
+	printf("\n");
+	printf("\n\n\t[A]--叶龙岛        [B]--炎龙沙漠");
+	printf("\n\n\t[C]--青龙仙宫      [D]--恶龙洞窟");
+	printf("\n\n\t[E]--水晶宫        [F]--龙王殿");
+	printf("\n\n\t[G]--超级魔龙殿    [Q]--回城");
+	while(1)
+	{
+		ch=getch();
+		if(ch=='q'||ch=='Q')
+		menuf();
+		if(ch=='a'||ch=='A'||ch=='b'||ch=='B'||ch=='c'||ch=='C'||ch=='d'||ch=='D'||ch=='e'||ch=='E'||ch=='f'||ch=='F'||ch=='g'||ch=='G')
+		 
+ 	  { 
+		{
+		  if(ch>96)
+		  cityk_n=ch-97;
+		  if(ch<91)
+		  cityk_n=ch-65;
+		  }
+      cityinfo(cityk_n);
+		
+	}
+	cityc();
+}
+}
+
+
+void cityinfo(int bhao)//地图详细，显示怪物 
+{
+	int pn,pn_n,k_n;
+	char ch;
+	btdy("-",gct[bhao].name);
+	printf("%s",gct[bhao].info);
+	gsdy("-",60);
+	printf("\n按键展开进入和此怪的战斗！【Q】-返回地图");
+	gsdy("-",60);
+	for(pn_n=1,pn=gct[bhao].sgnum;pn<(gct[bhao].sgnum+gct[bhao].gnum);pn++,pn_n++)
+	{
+	 if(pn%2==0)
+	 printf("\n\n");
+	printf("\t[%d]--%s",pn_n,ggw[pn].name);
+	}
+while(1)
+{
+	ch=getch();
+	if(ch=='q'||ch=='Q')
+	cityc();
+	if(ch=='1'||ch=='2'||ch=='3'||ch=='4')
+	{
+	  k_n=ch-49;
+	  pkmenu_n=0;
+	  here_ghp=ggw[k_n+(gct[bhao].sgnum)].hp;
+	  getggj=0;
+	  getgj=0;
+	  pkstart=0;
+	  pkload(k_n+(gct[bhao].sgnum));
+	}
+	cityinfo(cityk_n);
+}
+}
+
+
+void pkload(int bhao)//===================================================战斗核心！=======================================
+{
+	cls;
+	char ch;
+	int pn,rand_k;
+	btdy("-","【战斗ing】");
+	printf("\n%s:%s",ggw[bhao].name,ggw[bhao].talk);
+	gsdy("-",60);
+	printf("\n[%8.8s]\t【VS】\t[%8.8s]\n",gplay[c_play].name,ggw[bhao].name);
+	printf("\n勇士HP:%d\t  |\t怪物HP:%d",gplay[c_play].hp,here_ghp);
+	printf("\n勇士MP:%d",gplay[c_play].mp);
+	printf("\n");
+
+	//================================================================
+	if(pkstart==1)
+	{
+	
+    gsdy("-",60);
+	 if(here_ghp<0)
+	 {
+	 pkwin(bhao);
+	 cityinfo(cityk_n);
+	 }
+	 if(gplay[c_play].hp<0)
+	 {
+	 	pklost(bhao);
+		menuf();	
+	 }
+	 getgj=lgj*(rand()%gplay[c_play].gj+1);
+     getggj=lggj*(rand()%ggw[bhao].gj+1);
+	 here_ghp-=getgj;
+	 gplay[c_play].hp-=getggj;
+	 printf("\n\t【结果】：%s损失：%d\n",ggw[bhao].name,getgj);
+	 printf("\n\t          %s损失: %d\n",gplay[c_play].name,getggj); 
+	 
+	}
+
+	//===============================================================战斗结果处理核心 
+	gsdy("-",60);
+	printf("\n[X]--普通攻击    [S]--技能   [F]--包裹   [R]--逃跑");
+	if(pkmenu_n==0)
+	printf("\n\t[Z]--查看怪物信息    [Q]--返回上页");
+
+while(1)
+{
+	ch=getch();
+	if(ch=='x'||ch=='X')
+	{	
+	    getgj=0;
+    	 lgj=1;lfy=1;lspeed=1;lggj=1;lgfy=1;lgspeed=1;
+		 pkmenu_n=1;
+		 pkstart=1;
+         pkload(bhao);
+
+	}
+	if(ch=='q'&&pkmenu_n==0||ch=='Q'&&pkmenu_n==0)
+	cityinfo(cityk_n);
+	if(ch=='z'&&pkmenu_n==0||ch=='Z'&&pkmenu_n==0)
+	{
+		gwinfo(bhao);
+		pkload(bhao);
+	}
+	if(ch=='s'||ch=='S')
+	{
+		getgj=0;
+    	 lgj=1;lfy=1;lspeed=1;lggj=1;lgfy=1;lgspeed=1;
+		skill_n=1;
+		wp_run_n=bhao;
+		skback_n=1;
+	
+		skill();
+		pkmenu_n=1;
+         
+	}
+	if(ch=='f'||ch=='F')
+	{
+		spback_n=1;
+		wpback_n=1;
+		wp_run_n=bhao;
+     	wupin();
+	}
+	if(ch=='r'||ch=='R')
+	{
+		if(ggw[bhao].allow_run==1)
+		{
+			printf("\n【此战禁止逃跑！】");
+			getch();
+			pkload(bhao);
+		}
+	  rand_k=rand()%2+1;
+	  if(rand_k==1)
+	  {
+	    printf("\n逃跑成功！");
+	    getch();
+	    cityinfo(cityk_n);
+	  }
+	  else
+	  {
+	  	printf("\n逃跑失败！");
+	  	getch();
+	  	pkload(bhao);
+	  }
+	
+	
+}
+
+}
+}
+
+
+void pkwin(int bhao)  //战斗胜利 
+{
+	int rand_pk; 
+	int pn_yp,pn_wq,pn_qb;
+	int pna,pnb,pnc,pn_a=0,pn_b=0,pn_c=0;
+	int pn[10];
+	btdy("-","【战斗胜利！】");
+	printf("\n你战胜了 %s",ggw[bhao].name);
+	printf("\n【战果】:");
+	printf("\n获得经验:%d",ggw[bhao].hexp);
+	printf("\n获得金币:%d",ggw[bhao].hgold);
+	rand_pk=rand()%8+1;
+	if(rand_pk==1)//随机可能获得奖励 
+ {
+	if(ggw[bhao].hyp==1)
+	{
+		for(pna=0;pna<200;pna++)
+		  if(gwp[pna].zyk==1)
+		  {
+		    pn[pn_a]=pnc;
+		    pn_a++;
+		  }
+		  pn_yp=rand()%pn_a+1;
+		  gwp[pn_yp].haved+=1;
+		  printf("\n获得：%s*1",gwp[pn_yp].name);
+	}
+	if(ggw[bhao].hwp==1)
+	{
+		for(pnb=0;pnb<200;pnb++)
+		  if(gwp[pnb].zyk==2)
+		  {
+		    pn[pn_b]=pnc;
+		    pn_b++;
+		  }
+		  pn_wq=rand()%pn_b+1;
+		  gwp[pn_wq].haved+=1;
+		  printf("\n获得：%s*1",gwp[pn_wq].name);
+	}
+	if(ggw[bhao].hqb==1)
+	{
+		for(pnc=0;pnc<200;pnc++)
+		  if(gwp[pnc].zyk==3)
+		  {
+		    pn[pn_c]=pnc;
+		    pn_c++;
+		  }
+		  pn_qb=rand()%pn_c+1;
+		  gwp[pn_qb].haved+=1;
+		  printf("\n获得：%s*1",gwp[pn_qb].name);
+	}
+ }
+	
+	getch();
+	gplay[c_play].exp+=ggw[bhao].hexp;
+	gplay[c_play].gold+=ggw[bhao].hgold;
+	upcheck();
+	
+
+}
+
+
+
+void pklost(int bhao)//战斗失败 
+{
+	btdy("-","【战斗失败！】");
+	printf("\n%s:哈哈，想打败我，再去修炼几百年吧！",ggw[bhao].name);
+	printf("\n\n勇士，失败是成功的妈妈，请继续努力！");
+	printf("\n\n★按任意键回到家乡。");
+	getch();
+}
+
+void gwinfo(int bhao)//怪物信息查看 
+{
+	btdy("-","【怪物信息查看】");
+	printf("\n\n名称:%s",ggw[bhao].name);
+	printf("\n等级:%d",ggw[bhao].dj);
+	printf("\n攻击力:%d",ggw[bhao].gj);
+	printf("\n防御力:%d",ggw[bhao].fy);
+	printf("\n速度  :%d",ggw[bhao].speed);
+	printf("\n血量  :%d",ggw[bhao].hp);
+	printf("\n魔力值:%d",ggw[bhao].mp);
+	printf("\n经验值:%d",ggw[bhao].hexp);
+	printf("\n金币  :%d",ggw[bhao].hgold);
+	if(ggw[bhao].allow_run==1)
+	printf("\n【特殊】：不允许逃跑！"); 
+	printf("\n可能掉落："); 
+	if(ggw[bhao].hyp==1)
+	printf("\n\t【药品】");
+	if(ggw[bhao].hwp==1)
+	printf("\n\t【武器】");
+	if(ggw[bhao].hqb==1)
+	printf("\n\t【奇宝】");
+	printf("\n任意键返回战斗界面。");
+	getch();
+	 
+
+}
+
+
+void main_dh()//开场动画 
+{
+	int pn;
+    system("color 31");
+	for(pn=0;pn<60;pn++)
+	printf("*");
+	printf("\n\n\n");
+	for(pn=0;pn<15;pn++)
+	printf(" ");
+	sttdy("欢迎进入【灭龙传说】",50,500); 
+		
+	printf("\n\n\n");
+	for(pn=0;pn<60;pn++)
+	printf("*");
+	Sleep(1000);
+	cls;
+	
+}
+
+void peoinfo()//角色信息查看 
+{
+	char ch;
+	ttdy("","【角色信息】",1,0,0,0);
+	printf("\n\n侠名：%s",gplay[c_play].name);
+	printf("\n\n等级:%d (%d/%d)",gplay[c_play].dj,gplay[c_play].exp,gplay[c_play].exped);
+	printf("\n血量:%d/%d    魔力:%d/%d",gplay[c_play].hp,gplay[c_play].hpmax,gplay[c_play].mp,gplay[c_play].mpmax);
+	printf(" \n攻击力:%d \n防御:%d \n速度:%d",gplay[c_play].gj,gplay[c_play].fy,gplay[c_play].speed);
+	printf(" \n幸运:%d \n金币:%d  ",gplay[c_play].luck,gplay[c_play].gold);
+	printf("\n\n[W]--装备         [Y]--物品     ");
+	printf("\n\n[K]--技能         [Q]--返回     ");
+	while(1)
+	{
+		ch=getch();
+		if(ch=='q'||ch=='Q')
+		menuf();
+		if(ch=='w'||ch=='W')
+		{
+		test();
+		peoinfo();
+		}
+		if(ch=='k'||ch=='K')
+		{
+			skill_n=0;
+			skback_n=0;
+		  skill();
+		}
+		if(ch=='y'||ch=='Y')
+		{
+		wpback_n=2;
+		shop_n=1;
+		wupin();
+		}
+	}
+	peoinfo();
+
+}
+
+void skill()//技能 
+{
+	int pn=0;
+	char ch;
+	cls;
+	btdy("-","【技能】");
+	printf("\n★按相应数字键将显示详细，【Q】键返回上页★"); 
+	gsdy("-",60);
+	printf("\n\n按键 | 技能名称| 需要MP|可学等级|说明               |其他");
+	gsdy("-",60);
+	for(pn=0;pn<9;pn++)
+	{
+	printf("\n[%d]---%s\t%d\t%d级   %.16s...",pn+1,gskill[pn].name,gskill[pn].nmp,gskill[pn].ndj,gskill[pn].info);
+	if(gplay[c_play].dj>=gskill[pn].ndj)
+	printf(" ★已学会"); 
+	}
+while(1)
+{
+	ch=getch();
+	if(ch=='1'||ch=='2'||ch=='3'||ch=='4'||ch=='5'||ch=='6'||ch=='7'||ch=='8'||ch=='9')
+	  {
+	    sk_n=ch-49;
+	    skillinfo(sk_n);
+	  }
+    if(ch=='q'||ch=='Q')
+	  {
+	  if(skback_n==0)
+      peoinfo();
+      if(skback_n==1)
+      pkload(wp_run_n);
+	  }
+
+}
+skill();
+
+}
+
+
+void skillinfo(int bhao)//技能信息查看和释放，支持判断极限和魔法值扣除。 
+{
+	cls;
+	char ch;
+	btdy("-","【技能详细】");
+	printf("\n");
+	printf("\n%s",gskill[bhao].name);
+	if(gskill[bhao].ndj<=gplay[c_play].dj)
+	printf("  【已学会】\n\n"); 
+	else
+	printf("   【未掌握】\n\n"); 
+	skdy(gskill[bhao].info);
+	printf("\n\n作用：\n");
+	if(gskill[bhao].jhp>0)
+	printf("\n\tHP+%d",gskill[bhao].jhp);
+	if(gskill[bhao].jgj>0)
+	printf("\n\t攻击+%d倍",gskill[bhao].jgj);
+	if(gskill[bhao].jfy>0)
+	printf("\n\t防御+%d倍",gskill[bhao].jfy);
+	if(gskill[bhao].jspeed>0)
+	printf("\n\t速度+%d倍",gskill[bhao].jspeed);
+	if(gskill[bhao].jluck>0)
+	printf("\n\t幸运+%d倍",gskill[bhao].jluck);
+	if(skill_n==1)
+	printf("\n\nY--释放       N--返回战斗");
+	if(skill_n==0)
+	printf("\n\n【Q】--返回技能菜单");
+	while(1)
+	{
+		ch=getch();
+		if(ch=='y'&&skill_n==1||ch=='Y'&&skill_n==1)
+		{
+			if(gskill[bhao].ndj<=gplay[c_play].dj&&gskill[bhao].jhp<=0)
+			{
+				if(gplay[c_play].mp-gskill[bhao].nmp<0)
+				{
+					printf("\n【魔法值不足！】");
+					getch();
+					skill();
+				}
+			lgj=gskill[bhao].jgj;
+			lfy=gskill[bhao].jfy;
+			lspeed=gskill[bhao].jspeed;
+			gplay[c_play].mp-=gskill[bhao].nmp;
+            pkstart=1;
+			printf("\n【%s】释放成功！",gskill[bhao].name);
+			getch();
+			pkload(wp_run_n);
+			}
+			if(gskill[bhao].ndj<=gplay[c_play].dj&&gskill[bhao].jhp>0)
+			{
+				if(gplay[c_play].mp-gskill[bhao].nmp<0)
+				{
+					printf("\n【魔法值不足！】");
+					getch();
+					skill();
+				}
+				if((gplay[c_play].hp+gskill[bhao].jhp)>(gplay[c_play].hpmax+20))
+				{
+				  printf("\n【血量足够，无需添加】");
+				  getch();
+				  skill();
+				}
+				lgj=gskill[bhao].jgj;
+		     	lfy=gskill[bhao].jfy;
+		    	lspeed=gskill[bhao].jspeed;
+				gplay[c_play].hp+=gskill[bhao].jhp;
+				gplay[c_play].mp-=gskill[bhao].nmp;
+				printf("\n【%s】释放成功！",gskill[bhao].name);
+				getch();
+				pkload(wp_run_n);
+				
+				
+			}
+			else
+			{
+				printf("\n【等级不足，此技能您还不能释放！】");
+				getch();
+				skill();
+			}
+			
+		}
+		if(ch=='n'&&skill_n==1||ch=='N'&&skill_n==1)
+		pkload(wp_run_n);
+		if(ch=='q'&&skill_n==0||ch=='Q'&&skill_n==0)
+		skill();
+			
+		
+		
+	}
+	
+}
+
+
+void shopc()//商店，可切换物品种类，自动生成物品列表并添加控制按键 ！ 
+{
+	cls;
+	int pn_a=1,pn; //超出判断、临时 
+	char ch;
+	date_check();
+	btdy("$","灭龙商店");
+	printf("\n[W]--药品  |  [E]--武器  |  [R]--奇宝 |  [S]--包裹  |  [Q]--返回菜单\n");
+	for(pn=0;pn<60;pn++)
+	printf("-");
+	printf("\n按键 物品名    价格    最多购买（个）\n"); 
+	if(shop_n==1)
+	{
+		int n=1;
+		for(spn_a=0;spn_a<200;spn_a++)
+		if(gwp[spn_a].zyk==1&&gwp[spn_a].cbuy==1)
+		{
+			sp_a[n]=spn_a;
+			printf("\n[%d]---%s     %d金币        %d",n++,gwp[spn_a].name,gwp[spn_a].mgold,gwp[spn_a].mhave-gwp[spn_a].haved);
+			pn_a++;
+			}
+	}
+	if(shop_n==2)
+	{
+		int n=1;
+		for(spn_b=0;spn_b<200;spn_b++)
+		if(gwp[spn_b].zyk==2&&gwp[spn_b].cbuy==1)
+		{
+			sp_a[n]=spn_b;
+			printf("\n[%d]---%s     %d金币        %d",n++,gwp[spn_b].name,gwp[spn_b].mgold,gwp[spn_b].mhave-gwp[spn_c].haved);
+			pn_a++;
+			}
+	}
+	if(shop_n==3)
+	{
+		int n=1;
+		for(spn_c=0;spn_c<200;spn_c++)
+		if(gwp[spn_c].zyk==3&&gwp[spn_c].cbuy==1)
+		{
+			sp_a[n]=spn_c;
+          	printf("\n[%d]---%s     %d金币         %d",n++,gwp[spn_c].name,gwp[spn_c].mgold,gwp[spn_c].mhave-gwp[spn_c].haved);
+          	pn_a++;
+          	
+			}
+	}
+while(1)
+{
+	ch=getch();
+	if(ch=='w'||ch=='W')
+	{shop_n=1;
+	shopc();}
+	if(ch=='e'||ch=='E')
+	{shop_n=2;
+	shopc();}
+	if(ch=='r'||ch=='R')
+	{shop_n=3;
+	shopc();}
+	if(ch=='q'||ch=='Q')
+	{
+		if(shop_back==1)
+	    wupin();
+	    if(shop_back==2)
+	    menuf();
+	}
+	if(ch=='1'||ch=='2'||ch=='3'||ch=='4'||ch=='5'||ch=='6'||ch=='7'||ch=='8'||ch=='9')
+	{
+
+		  spn_n=sp_a[ch-48];
+		  if((ch-48)<pn_a)
+         	{
+			 
+			 wpinfo_n=1;
+			 spback_n=1;
+           	wpinfo(spn_n);
+			   }
+
+      	
+	}
+	if(ch=='s'||ch=='S')
+	{
+	shop_n=1;
+	wupin();
+	
+	}
+
+	
+	
+}
+
+}
+
+void wupin()//物品包裹 
+{
+    cls;
+	int pn_a=1,pn; //超出判断、临时 
+	char ch;
+	date_check();
+	btdy("=","包裹");
+	printf("\n[W]--药 | [E]--武器 | [R]--奇宝 | [S]--商店 | [Q]--返回菜单\n");
+	for(pn=0;pn<60;pn++)
+	printf("=");
+	printf("\n按键 物品名         价格         当前拥有（个）\n");
+	if(shop_n==1)
+	{
+		int n=1;
+		for(spn_a=0;spn_a<200;spn_a++)
+		if(gwp[spn_a].zyk==1&&gwp[spn_a].haved>0)
+		{
+			sp_a[n]=spn_a;
+			printf("\n[%d]---%s          %d金币       %d个",n++,gwp[spn_a].name,gwp[spn_a].mgold,gwp[spn_a].haved);
+			pn_a++;
+			}
+	  if(n==1)
+		printf("\n没有任何药品！");
+
+	}
+	if(shop_n==2)
+	{
+		int n=1;
+		for(spn_b=0;spn_b<200;spn_b++)
+
+		if(gwp[spn_b].zyk==2&&gwp[spn_b].haved>0)
+		{
+			sp_a[n]=spn_b;
+			printf("\n[%d]---%s          %d金币         %d个",n++,gwp[spn_b].name,gwp[spn_b].mgold,gwp[spn_b].haved);
+			pn_a++;
+			}
+		if(n==1)
+		printf("\n没有任何武器！");
+
+	}
+	if(shop_n==3)
+	{
+		int n=1;
+		for(spn_c=0;spn_c<200;spn_c++)
+
+		 if(gwp[spn_c].zyk==3&&gwp[spn_c].haved>0)
+		{
+			sp_a[n]=spn_c;
+          	printf("\n[%d]---%s          %d金币        %d个",n++,gwp[spn_c].name,gwp[spn_c].mgold,gwp[spn_c].haved);
+          	pn_a++;
+          	
+			}
+	  if(n==1)
+		printf("\n没有任何奇宝！");
+	}
+while(1)
+{
+	ch=getch();
+	if(ch=='w'||ch=='W')
+	{shop_n=1;
+	wupin();}
+	if(ch=='e'||ch=='E')
+	{shop_n=2;
+	wupin();}
+	if(ch=='r'||ch=='R')
+	{shop_n=3;
+	wupin();}
+	if(ch=='q'||ch=='Q')
+	{
+		if(wpback_n==0)
+		menuf();
+		if(wpback_n==1)
+		pkload(wp_run_n);
+		if(wpback_n==2)
+		peoinfo();
+	}
+	if(ch=='1'||ch=='2'||ch=='3'||ch=='4'||ch=='5'||ch=='6'||ch=='7'||ch=='8'||ch=='9')
+	{
+
+		  spn_n=sp_a[ch-48];
+		  if((ch-48)<pn_a)
+         	{
+			 spback_n=3;
+			 wpinfo_n=2;
+           	wpinfo(spn_n);
+			   }	
+	}
+	if(ch=='s'||ch=='S')
+	{
+		shop_back=1;
+		shop_n=1; 
+	   shopc();
+	}
+		
+}
+}
+
+
+void usewp(int bhao)//使用物品 
+{
+	btdy("=","【使用物品】");
+	printf("\n%s",gwp[bhao].name);
+	printf("使用成功！");
+	printf("\n\n获得效果：");
+	if(gwp[bhao].jhp>0)
+	{
+	/*                                                                 //暂时不做检查 
+	  if((gplay[c_play].hp+gwp[bhao].jhp)>gplay[c_play].hpmax)
+	  {
+	  	printf("\n血量足够，无需添加！");
+	  	getch();
+	  	wpinfo(bhao);
+	  }
+	  */
+	  
+	 gplay[c_play].hp+=gwp[bhao].jhp;
+     printf("HP+%d",gwp[bhao].jhp);
+	}
+	if(gwp[bhao].jmp>0)
+	{gplay[c_play].mp+=gwp[bhao].jmp;
+	printf("  MP+%d",gwp[bhao].jmp);}
+	if(gwp[bhao].jgj>0)
+	{gplay[c_play].gj+=gwp[bhao].jgj;
+	printf("  攻击+%d",gwp[bhao].jgj);}
+	if(gwp[bhao].jfy>0)
+	{gplay[c_play].fy+=gwp[bhao].jfy;
+	printf("  防御+%d",gwp[bhao].jfy);}
+	if(gwp[bhao].jspeed>0)
+	{gplay[c_play].speed+=gwp[bhao].jspeed;
+	printf("  速度+%d",gwp[bhao].jspeed);}
+	if(gwp[bhao].jluck>0)
+	{gplay[c_play].luck+=gwp[bhao].jluck;
+	printf("  幸运+%d",gwp[bhao].jluck);}
+
+	gwp[bhao].haved-=1;
+	getch();
+	if(gwp[bhao].haved<1)
+	wupin();
+	wpinfo(bhao);
+	
+	
+}
+
+
+
+void wpinfo(int bhao)//物品信息查看，接受物品编号 
+{
+	int pn;
+	char ch;
+	btdy("-","【物品信息】");
+	printf("\n名称：%s",gwp[bhao].name);
+	if(gwp[bhao].cshop!=1)
+	printf("（不可出售）");
+	printf("\n\n品质：%s",gwp[bhao].pinzhi);
+	printf("\n价格：%d金币     拥有：%d 个",gwp[bhao].mgold,gwp[bhao].haved); 
+	printf("\n作用：");
+	if(gwp[bhao].jhp>1)
+	printf("\n\n\tHP+%d",gwp[bhao].jhp);
+	if(gwp[bhao].jmp>1)
+	printf("\n\tMP+%d",gwp[bhao].jmp);
+	if(gwp[bhao].jgj>1)
+	printf("\n\t攻击+%d",gwp[bhao].jgj);
+	if(gwp[bhao].jfy>1)
+	printf("\n\t防御+%d",gwp[bhao].jfy);
+	if(gwp[bhao].jspeed>1)
+	printf("\n\t速度+%d",gwp[bhao].jspeed);
+	if(gwp[bhao].jluck>1)
+	printf("\n\t幸运+%d",gwp[bhao].jluck);
+	if(gwp[bhao].jbaoj>1)
+	printf("\n\t暴击+%d",gwp[bhao].jbaoj);
+	printf("\n\n\t*占用包裹：%d格",gwp[bhao].nbag);
+	if(wpinfo_n==1)
+	printf("\n\n\t[B]--购买   [Q]--返回商店");
+	if(wpinfo_n==2)
+	printf("\n\n\t[K]--使用   [P]--出售      [Q]--返回物品");
+	while(1)
+	{
+		ch=getch();
+		if(ch=='b'||ch=='B')
+		buywp(bhao);
+		if(ch=='q'||ch=='Q')
+		 {
+		 if(spback_n==1)
+		 shopc();
+		 if(spback_n==2)
+		 peoinfo();
+		 if(spback_n==3)
+		 wupin();
+		 }
+	   if(ch=='k'||ch=='K') 
+	   usewp(bhao);
+	   if(ch=='p'||ch=='P')
+	    { if(gwp[bhao].cshop!=1)
+	     {
+	     	printf("\n\n\t【警告】该物品无法出售！");
+	     	getch();
+	     	wpinfo(bhao);
+	     }
+	   pwp(bhao);
+	   }
+	}
+		
+}
+
+void pwp(int bhao)//出售物品 
+{
+	int pn,n=0;
+	char ch; 
+	
+	while(1)
+	{
+		cls;
+	btdy("-","出售确认");
+	printf("\n请按键确定出售个数，当前拥有：%d（个）！):",gwp[bhao].haved);
+	printf("\n\n[W]--↑  [S]--↓  [空格键]--确认出售   [Q]--返回");
+	printf("\n\n当前准备出售：%d  个",n); 
+		ch=getch();
+		if(ch=='w')
+		{
+			if(n>gwp[bhao].haved-1)
+			{
+			  printf("\n已到达最大值!");
+			  getch(); 
+			}
+			 else
+		     n=n+1;
+		}
+		if(ch=='s')
+		{
+			if(n<1)
+			{
+				printf("\n已达到最小值！");
+				getch();
+			}
+			else
+	      	n=n-1;
+		}
+		if(ch==' ')
+		break;
+		if(ch=='q')
+		wpinfo(bhao);
+	}
+	printf("\n你确认要出售%d个%s?可获得%d金币",n,gwp[bhao].name,n*gwp[bhao].mgold);
+	printf("\n\n[Y]-确认   [N]-放弃");
+	while(1)
+	{
+		ch=getch();
+		if(ch=='y'||ch=='Y')
+		{
+		gwp[bhao].haved-=(n);
+		gplay[c_play].gold+=n*gwp[bhao].mgold;
+		printf("\n出售成功！");
+		getch();
+		wupin();
+		}
+		if(ch=='n'||ch=='N')
+		wpinfo(bhao);
+	}
+		
+}
+
+
+void buywp(int bhao)// 物品购买判定，接受物品编号参数 
+{
+	int n=0,pn;
+	char ch; 
+	while(1)
+	{
+		cls;
+	btdy("-","购买物品");
+	printf("\n少侠，你现在拥有金币： %d 个 ",gplay[c_play].gold);
+	printf("\n【%s】 标价 %d /个",gwp[bhao].name,gwp[bhao].mgold);
+	printf("\n\n[W]--↑  [S]--↓  [空格键]--确认购买   [Q]--返回");
+	printf("\n\n当前准备购买：%d  个",n); 
+	ch=getch();
+		if(ch=='w')
+		{
+		     n=n+1;
+		}
+		if(ch=='s')
+		{
+			if(n<1)
+			{
+				printf("\n已达到最小值！");
+				getch();
+			}
+			else
+	      	n=n-1;
+		}
+		if(ch==' ')
+		break;
+		if(ch=='q')
+		wpinfo(bhao);
+	}
+	if(n<=0||n>1000)
+	{
+	printf("\n请求错误！请选择大于0并且小于1000的数目！");
+	getch();
+	buywp(bhao); 
+	}
+	if((gplay[c_play].gold-pn)<0)
+	{
+		printf("\n少侠，你的金币不够哦！");
+		getch();
+		wpinfo(bhao);
+		}
+	if((gwp[bhao].haved+n)>gwp[bhao].mhave)
+	{printf("\n你最多还能购买【%s】%d个！",gwp[bhao].name,gwp[bhao].mhave-gwp[bhao].haved);
+	getch();
+	wpinfo(bhao);
+	}
+	pn=gwp[bhao].mgold*n;
+    gplay[c_play].gold-=pn;
+	printf("\n购买%d个%s成功！",n,gwp[bhao].name);
+	printf("\n花费%d个金币",pn);
+	gwp[bhao].haved+=n;
+	getch();
+	wpinfo(bhao);
+}
+
+
+void upcheck()
+{
+	date_check();
+	if(gplay[c_play].exp>=gplay[c_play].exped)
+	{
+		cls;
+		gplay[c_play].dj+=1;
+		  if(gplay[c_play].dj>25&&upcheck_k==0)
+		  {
+		  	upcheck_k=1;
+		  	god_here();
+		  }
+		gplay[c_play].exp=gplay[c_play].exp-gplay[c_play].exped;
+		gplay[c_play].exped=gplay[c_play].dj*100;
+		gplay[c_play].gj+=5;
+		gplay[c_play].fy+=4;
+		gplay[c_play].speed+=2;
+		gplay[c_play].luck+=1;
+		gplay[c_play].hpmax=gplay[c_play].dj*100;
+		gplay[c_play].mpmax=gplay[c_play].dj*50;
+		gplay[c_play].hp=gplay[c_play].hpmax;
+		gplay[c_play].mp=gplay[c_play].mpmax;
+		btdy("-","【升级啦！】");
+		printf("\n恭喜你，勇士！你升到了%d级！",gplay[c_play].dj);
+		printf("\n\n攻击+5\n防御+4\n速度+2\n幸运+1\n ");
+		getch();
+		upcheck();
+	}
+	
+}
+
+void god_mod()//上帝代码 
+{
+	btdy("-","【上帝代码】");
+	
+	if(gplay[c_play].gj>100)
+	{
+		printf("\n上帝代码已失效！");
+		getch();
+		menuf();
+	}
+	else
+	{ 
+	printf("\n你看到了上帝！你的攻击力提升了10倍！");
+	gplay[c_play].gj*=10;
+	getch();
+	menuf();
+	}
+}
+
+void ttdy(char main_t[],char m_title[],int clspa,int clspb,int timep,int ptime)//动态打印函数，通用！ 打印主体、标题、清屏确认（clspa=1显示前清屏，clspb=1显示后清屏,播放速度，播完暂停时间 
+{
+	if(clspa==1)
+	{cls;}
+	int len,pn;
+	len=strlen(main_t);
+	for(pn=0;pn<15;pn++)
+	printf(" ");
+	printf("%s\n",m_title);
+  for(pn=0;pn<len;pn++)	
+  {
+  	if(pn%40==0)
+  	printf("\n\n");
+  printf("%c",main_t[pn]);
+  Sleep(timep);}
+  if(clspb==1)
+	{cls;}
+	Sleep(ptime);	
+}
+
+void sttdy(char stt[],int timep,int ptime)//单一打印函数 
+{
+	int pn,len;
+	len=strlen(stt);
+	for(pn=0;pn<len;pn++)
+	{
+	if(pn%40==0)
+	printf(" ");
+	printf("%c",stt[pn]);
+	Sleep(timep);
+
+	}
+	Sleep(ptime);
+}
+
+void skdy(char skt[])//技能说明无损打印 
+{
+	int pn,len;
+	len=strlen(skt);
+	printf("   ");
+	for(pn=0;pn<len;pn++)
+	{
+		printf("%c",skt[pn]);
+	}
+	
+}
+
+void btdy(char btfh[],char bttitle[])//标题打印函数 
+{
+	cls;
+	int pn;
+	printf("\n"); 
+	for(pn=0;pn<25;pn++)
+	printf(" ");
+	printf("%s",bttitle);
+	printf("\n");
+	for(pn=0;pn<60;pn++)
+	printf("%s",btfh);
+	printf("\n");
+}
+	
+
+void gsdy(char gst[],int len)//打印间隔条 
+{
+	int pn;
+	printf("\n");
+	for(pn=0;pn<len;pn++)
+	printf("%s",gst);
+}
+	
+
+void errdy(char etext[],char e_title[],char e_class[],int clsup)//错误反馈 
+{
+    int pn=0,len;
+    system("color c0");
+	if(clsup==1)
+	{cls;}
+	printf("\n\n\a");
+	for(pn=0;pn<20;pn++)
+	printf(" ");
+	printf("%s\n",e_title);
+	for(pn=0;pn<50;pn++)
+	printf("*");
+	printf("\n\n【错误等级】：%s\n\n",e_class);
+	printf("【错误原因】：\n ");
+	len=strlen(etext);
+	for(pn=0;pn<=len;pn++)
+	{
+		if(pn%41==0)
+		printf("\n");
+		printf("%c",etext[pn]);
+	}	
+	getch();	
+	 
+}
+
+
+void end_from_menu()//主菜单退出确认 
+{
+	int sure;
+	sure=MessageBox(NULL,"你确认要退出游戏？","退出确认",MB_YESNO);
+	if(sure==IDYES)
+	exit(1);
+	else
+	main();
+}
+
+void help_menu()//游戏帮助 
+{
+	cls;
+	ttdy(help_m,"【游戏帮助】",1,0,0,0);
+	getch();
+	menuf();
+	
+	}
+
+
+void test()//测试引导 
+{
+	int k;
+	k=MessageBox(NULL,"该功能暂未开放！是否到作者论坛了解更多信息？","系统提示",MB_YESNO|MB_ICONINFORMATION);
+	if(k==IDYES)
+	{
+		system("start www.nextgod.com/bbs");
+	}
+	else
+	;
+}
+
+void god_here()//神秘奖励 
+{
+MessageBox(NULL,"恭喜你勇士！你成功过关，将得到神秘奖励！","神秘奖励",MB_OK);
+system("start www.nextgod.com");
+
+}
+
+
+void small_game()// 小游戏，掷骰子 
+{
+	cls;
+	system("color 35");
+	int ran_n=0,get_n=0,pn=1;
+	int dgold=0,get_gold=0;
+	char ch;
+	btdy("-","【掷骰子】");
+
+	printf("\n\t欢迎来到灭龙酒吧，你可以在这里赚取游戏金币");
+	gsdy("◆",30);
+	printf("\n请输入底金（0--500，仅限数字，最大：%d）：",gplay[c_play].gold);
+	scanf("%d",&dgold); 
+	if(gplay[c_play].gold-dgold<0)
+	{
+	  printf("\n金币不够底金哦！请重新输入！");
+	  getch();
+	  small_game();
+	}
+	
+	printf("\n请按键选择大小：");
+	printf("\n\n\tA--选择大   B--选择小");
+	while(pn)
+	{
+		ch=getch();
+		if(ch=='a'||ch=='A')
+		{
+		 get_n=1;
+		 pn=0;
+		}
+		if(ch=='b'||ch=='B')
+		{
+		 get_n=2;
+		 pn=0;
+		 }
+	}
+
+if(get_n==1)
+printf("\n你选择了大");
+if(get_n==2)
+printf("\n你选择了小！"); 
+printf("\n\n按任意键开始投掷！");
+getch();
+printf("\n骰子高速旋转中.....");
+Sleep(1000);
+ran_n=rand()%6+1;
+if((ran_n<=3&&get_n==2)||(ran_n>3&&get_n==1))
+{
+ printf("\n恭喜你，猜对啦！获得金币%d个",dgold);
+ printf("骰子值：%d",ran_n);  
+ gplay[c_play].gold+=dgold;
+ getch();
+ menuf();
+}
+else
+{
+	printf("\n不好意思，您猜错了！失去金币%d个",dgold);
+	printf("骰子值：%d",ran_n); 
+	gplay[c_play].gold-=dgold;
+	getch();
+	menuf();
+}
+		
+}
+
+
+void HideCursor()//隐藏光标 
+{
+	CONSOLE_CURSOR_INFO cursor_info = {1, 0};	//后边的0代表光标不可见
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor_info);
+}
+
+void date_check()//系统数据检查 
+{
+	if(gplay[c_play].dj>100||gplay[c_play].dj<0||gplay[c_play].gold>200000||gplay[c_play].speed>1000||gplay[c_play].exped<0||gplay[c_play].exped>1000000)
+	{
+	errdy("程序数据异常，可能存在利用BUG作弊或者档案读取异常，游戏将自动结束,请按照规则进行游戏!","【BUG警告】","严重",0);
+	exit(1); 
+	}
+	;
+}
+
+
+
+
+
+
+
+
