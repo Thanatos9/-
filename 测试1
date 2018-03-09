@@ -13,7 +13,6 @@ struct data {
 
 } Player;
 
-struct data {
 
 
 void color() {
@@ -81,24 +80,32 @@ void selectplayer(int n) {
 		Player.HP=10;
 		Player.MP=10;
 		Player.DP=10;
+		Player.CHR = 10;
+		Player.STR = 7;
 		puts("你将成为下面使者开始冒险!");
 		n=1;
 	}else if(m==2) {
 		Player.HP=10;
 		Player.MP=10;
 		Player.DP=10;
+		Player.CHR = 7;
+		Player.STR = 9;
 		puts("你将成为XB骑士开始冒险!");
 		n=2;
 	}else if(m==3) {
 		Player.HP=10;
 		Player.MP=10;
 		Player.DP=10;
+		Player.CHR = 7;
+		Player.STR = 7;
 		puts("你将成为天宇技师开始冒险!");
 		n=3;
 	}else if(m==4) {
 		Player.HP=10;
 		Player.MP=10;
 		Player.DP=10;
+		Player.CHR = 7;
+		Player.STR = 5;
 		puts("你将成为单车武士开始冒险!");
 		n=4;
 	}else {
@@ -109,9 +116,54 @@ void selectplayer(int n) {
 
 }
 
-void text1() {
-	puts("");
-
+void test1() {
+	system("cls");
+	puts("你醒来发现倒在一个祭坛上，全是无力，头很疼/n接下来你会怎么办");
+	printf("请使用数字1-2选择\n");
+    printf("1.先躲藏起来\n");
+    printf("2.马上起身出去\n");
+	int choice;
+	scanf("%d",&choice);
+    switch(choice) {
+        case 1:
+			system("cls");
+			int case1choice;
+            printf("他们进来了，你听到他们在说祭坛天选之人的事情\n");
+            printf("1.出去见他们\n");
+			printf("2.继续躲藏\n");
+            scanf("%d", &case1choice);
+            if (case1choice == 1) {
+				system("cls");
+				if(Player.STR > 8) {
+					printf("因为你的样子很狼狈，他们觉得你像个神志不清的流浪汉，于是想打你，但你反而把他们打跑了\n");
+					goto aa;
+				}
+				if(Player.CHR > 7) {
+					printf("你的样子看起来就很有气质，于是他们觉得你就是他们要找的天选之人，邀请你去他们的村庄\n");
+					goto aa;
+				}
+                printf("因为你的样子很狼狈，他们觉得你像个神志不清的流浪汉，于是把你赶了出去，顺便还踢了你几脚\n");
+                printf("你的血量减少了20\n");
+                Player.HP -= 20;
+               
+            } else {
+                printf("他们谈论了一会，发现祭坛并未变化，于是离开了\n");
+                printf("你稍微休息了一会，准备离开这里\n");
+                
+            }
+            aa:printf("你离开了这里，你发现山下有一座小村庄\n");
+            printf("你准备到村庄里去\n");
+            Sleep(500);
+            break;
+        case 2:
+            printf("你快速离开了这里，你发现山下有一座小村庄\n");
+            printf("你准备到村庄里去\n");
+            Sleep(500);
+            break;
+        default:
+            printf("别调皮！\n");
+            break;
+}
 }
 
 
@@ -128,4 +180,5 @@ void main() {
 	progress();
 	int n;
 	selectplayer(n);
+	test1();
 }
