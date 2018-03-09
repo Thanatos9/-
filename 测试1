@@ -123,7 +123,7 @@ void test1() {
     printf("1.先躲藏起来\n");
     printf("2.马上起身出去\n");
 	int choice;
-	scanf("%d",&choice);
+    aa1:scanf("%d",&choice);
     switch(choice) {
         case 1:
 			system("cls");
@@ -136,11 +136,11 @@ void test1() {
 				system("cls");
 				if(Player.STR > 8) {
 					printf("因为你的样子很狼狈，他们觉得你像个神志不清的流浪汉，于是想打你，但你反而把他们打跑了\n");
-					goto aa;
+					goto aa2;
 				}
 				if(Player.CHR > 7) {
 					printf("你的样子看起来就很有气质，于是他们觉得你就是他们要找的天选之人，邀请你去他们的村庄\n");
-					goto aa;
+					goto aa2;
 				}
                 printf("因为你的样子很狼狈，他们觉得你像个神志不清的流浪汉，于是把你赶了出去，顺便还踢了你几脚\n");
                 printf("你的血量减少了20\n");
@@ -151,7 +151,7 @@ void test1() {
                 printf("你稍微休息了一会，准备离开这里\n");
                 
             }
-            aa:printf("你离开了这里，你发现山下有一座小村庄\n");
+            aa2:printf("你离开了这里，你发现山下有一座小村庄\n");
             printf("你准备到村庄里去\n");
             Sleep(500);
             break;
@@ -162,6 +162,7 @@ void test1() {
             break;
         default:
             printf("别调皮！\n");
+			goto aa1;
             break;
 }
 }
